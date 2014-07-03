@@ -12,6 +12,7 @@ class Lexer(object):
         r'(?P<literal>(`(?:\\\\|\\`|[^`])*`))|'
         r'(?P<filter>\[\?)|'
         r'(?P<or>\|\|)|'
+        r'(?P<and>&&)|'
         r'(?P<pipe>\|)|'
         r'(?P<ne>!=)|'
         r'(?P<rbrace>\})|'
@@ -32,6 +33,7 @@ class Lexer(object):
         r'(?P<expref>&)|'
         r'(?P<gt>>)|'
         r'(?P<current>@)|'
+        r'(?P<not>!)|'
         r'(?P<skip>[ \t]+)'
     )
 
