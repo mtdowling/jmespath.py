@@ -34,11 +34,11 @@ class Lexer(object):
         r'(?P<gt>>)|'
         r'(?P<current>@)|'
         r'(?P<not>!)|'
-        r'(?P<skip>[ \t]+)'
+        r'(?P<skip>[ \t\n]+)'
     )
 
     def __init__(self):
-        self.master_regex = re.compile(self.TOKENS)
+        self.master_regex = re.compile(self.TOKENS, re.MULTILINE|re.DOTALL)
 
     def tokenize(self, expression):
         if not expression:
