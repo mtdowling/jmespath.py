@@ -4,125 +4,6 @@ from json import loads
 
 from jmespath.exceptions import LexerError, EmptyExpressionError
 
-VALID_NUMBER = set('-' + string.digits)
-VALID_IDENTIFIER = set(string.ascii_letters + string.digits + '_')
-STATE_IDENTIFIER = 0
-STATE_NUMBER = 1
-STATE_SINGLE_CHAR = 2
-STATE_WHITESPACE = 3
-STATE_STRING_LITERAL = 4
-STATE_QUOTED_STRING = 5
-STATE_JSON_LITERAL = 6
-STATE_LBRACKET = 7
-STATE_PIPE = 8
-STATE_LT = 9
-STATE_GT = 10
-STATE_EQ = 11
-STATE_NOT = 12
-TRANSITION_TABLE = {
-    '<': STATE_LT,
-    '>': STATE_GT,
-    '=': STATE_EQ,
-    '!': STATE_NOT,
-    '[': STATE_LBRACKET,
-    '|': STATE_PIPE,
-    '`': STATE_JSON_LITERAL,
-    '"': STATE_QUOTED_STRING,
-    "'": STATE_STRING_LITERAL,
-    '-': STATE_NUMBER,
-    '0': STATE_NUMBER,
-    '1': STATE_NUMBER,
-    '2': STATE_NUMBER,
-    '3': STATE_NUMBER,
-    '4': STATE_NUMBER,
-    '5': STATE_NUMBER,
-    '6': STATE_NUMBER,
-    '7': STATE_NUMBER,
-    '8': STATE_NUMBER,
-    '9': STATE_NUMBER,
-    '.': STATE_SINGLE_CHAR,
-    '*': STATE_SINGLE_CHAR,
-    ']': STATE_SINGLE_CHAR,
-    ',': STATE_SINGLE_CHAR,
-    ':': STATE_SINGLE_CHAR,
-    '@': STATE_SINGLE_CHAR,
-    '&': STATE_SINGLE_CHAR,
-    '(': STATE_SINGLE_CHAR,
-    ')': STATE_SINGLE_CHAR,
-    '{': STATE_SINGLE_CHAR,
-    '}': STATE_SINGLE_CHAR,
-    '_': STATE_IDENTIFIER,
-    'A': STATE_IDENTIFIER,
-    'B': STATE_IDENTIFIER,
-    'C': STATE_IDENTIFIER,
-    'D': STATE_IDENTIFIER,
-    'E': STATE_IDENTIFIER,
-    'F': STATE_IDENTIFIER,
-    'G': STATE_IDENTIFIER,
-    'H': STATE_IDENTIFIER,
-    'I': STATE_IDENTIFIER,
-    'J': STATE_IDENTIFIER,
-    'K': STATE_IDENTIFIER,
-    'L': STATE_IDENTIFIER,
-    'M': STATE_IDENTIFIER,
-    'N': STATE_IDENTIFIER,
-    'O': STATE_IDENTIFIER,
-    'P': STATE_IDENTIFIER,
-    'Q': STATE_IDENTIFIER,
-    'R': STATE_IDENTIFIER,
-    'S': STATE_IDENTIFIER,
-    'T': STATE_IDENTIFIER,
-    'U': STATE_IDENTIFIER,
-    'V': STATE_IDENTIFIER,
-    'W': STATE_IDENTIFIER,
-    'X': STATE_IDENTIFIER,
-    'Y': STATE_IDENTIFIER,
-    'Z': STATE_IDENTIFIER,
-    'a': STATE_IDENTIFIER,
-    'b': STATE_IDENTIFIER,
-    'c': STATE_IDENTIFIER,
-    'd': STATE_IDENTIFIER,
-    'e': STATE_IDENTIFIER,
-    'f': STATE_IDENTIFIER,
-    'g': STATE_IDENTIFIER,
-    'h': STATE_IDENTIFIER,
-    'i': STATE_IDENTIFIER,
-    'j': STATE_IDENTIFIER,
-    'k': STATE_IDENTIFIER,
-    'l': STATE_IDENTIFIER,
-    'm': STATE_IDENTIFIER,
-    'n': STATE_IDENTIFIER,
-    'o': STATE_IDENTIFIER,
-    'p': STATE_IDENTIFIER,
-    'q': STATE_IDENTIFIER,
-    'r': STATE_IDENTIFIER,
-    's': STATE_IDENTIFIER,
-    't': STATE_IDENTIFIER,
-    'u': STATE_IDENTIFIER,
-    'v': STATE_IDENTIFIER,
-    'w': STATE_IDENTIFIER,
-    'x': STATE_IDENTIFIER,
-    'y': STATE_IDENTIFIER,
-    'z': STATE_IDENTIFIER,
-    ' ': STATE_WHITESPACE,
-    "\t": STATE_WHITESPACE,
-    "\n": STATE_WHITESPACE,
-    "\r": STATE_WHITESPACE
-}
-SIMPLE_TOKENS = {
-    '.': 'dot',
-    '*': 'star',
-    ']': 'rbracket',
-    ',': 'comma',
-    ':': 'colon',
-    '@': 'current',
-    '&': 'expref',
-    '(': 'lparen',
-    ')': 'rparen',
-    '{': 'lbrace',
-    '}': 'rbrace'
-}
-
 
 class Scanner(object):
     def __init__(self, expression):
@@ -162,72 +43,163 @@ class Scanner(object):
 
 
 class Lexer(object):
+    VALID_NUMBER = set('-' + string.digits)
+    VALID_IDENTIFIER = set(string.ascii_letters + string.digits + '_')
+
+    def __init__(self):
+        self._transitions = {
+            '[': self._consume_lbracket,
+            '.': lambda scanner: self._simple_token(scanner, 'dot'),
+            '*': lambda scanner: self._simple_token(scanner, 'star'),
+            ']': lambda scanner: self._simple_token(scanner, 'rbracket'),
+            ',': lambda scanner: self._simple_token(scanner, 'comma'),
+            ':': lambda scanner: self._simple_token(scanner, 'colon'),
+            '@': lambda scanner: self._simple_token(scanner, 'current'),
+            '&': lambda scanner: self._simple_token(scanner, 'expref'),
+            '(': lambda scanner: self._simple_token(scanner, 'lparen'),
+            ')': lambda scanner: self._simple_token(scanner, 'rparen'),
+            '{': lambda scanner: self._simple_token(scanner, 'lbrace'),
+            '}': lambda scanner: self._simple_token(scanner, 'rbrace'),
+            '_': self._consume_identifier,
+            'A': self._consume_identifier,
+            'B': self._consume_identifier,
+            'C': self._consume_identifier,
+            'D': self._consume_identifier,
+            'E': self._consume_identifier,
+            'F': self._consume_identifier,
+            'G': self._consume_identifier,
+            'H': self._consume_identifier,
+            'I': self._consume_identifier,
+            'J': self._consume_identifier,
+            'K': self._consume_identifier,
+            'L': self._consume_identifier,
+            'M': self._consume_identifier,
+            'N': self._consume_identifier,
+            'O': self._consume_identifier,
+            'P': self._consume_identifier,
+            'Q': self._consume_identifier,
+            'R': self._consume_identifier,
+            'S': self._consume_identifier,
+            'T': self._consume_identifier,
+            'U': self._consume_identifier,
+            'V': self._consume_identifier,
+            'W': self._consume_identifier,
+            'X': self._consume_identifier,
+            'Y': self._consume_identifier,
+            'Z': self._consume_identifier,
+            'a': self._consume_identifier,
+            'b': self._consume_identifier,
+            'c': self._consume_identifier,
+            'd': self._consume_identifier,
+            'e': self._consume_identifier,
+            'f': self._consume_identifier,
+            'g': self._consume_identifier,
+            'h': self._consume_identifier,
+            'i': self._consume_identifier,
+            'j': self._consume_identifier,
+            'k': self._consume_identifier,
+            'l': self._consume_identifier,
+            'm': self._consume_identifier,
+            'n': self._consume_identifier,
+            'o': self._consume_identifier,
+            'p': self._consume_identifier,
+            'q': self._consume_identifier,
+            'r': self._consume_identifier,
+            's': self._consume_identifier,
+            't': self._consume_identifier,
+            'u': self._consume_identifier,
+            'v': self._consume_identifier,
+            'w': self._consume_identifier,
+            'x': self._consume_identifier,
+            'y': self._consume_identifier,
+            'z': self._consume_identifier,
+            ' ': self._skip_whitespace,
+            "\t": self._skip_whitespace,
+            "\n": self._skip_whitespace,
+            "\r": self._skip_whitespace,
+            '<': lambda scanner: self._match_or_else(scanner, '=',
+                                                     'lte', 'lt'),
+            '>': lambda scanner: self._match_or_else(scanner, '=',
+                                                     'gte', 'gt'),
+            '=': lambda scanner: self._match_or_else(scanner, '=',
+                                                     'eq', 'unknown'),
+            '!': lambda scanner: self._match_or_else(scanner, '=',
+                                                     'neq', 'unknown'),
+            '|': lambda scanner: self._match_or_else(scanner, '|',
+                                                     'or', 'pipe'),
+            '`': self._consume_literal,
+            '"': self._consume_quoted_identifier,
+            "'": self._consume_raw_string_literal,
+            '-': self._consume_number,
+            '0': self._consume_number,
+            '1': self._consume_number,
+            '2': self._consume_number,
+            '3': self._consume_number,
+            '4': self._consume_number,
+            '5': self._consume_number,
+            '6': self._consume_number,
+            '7': self._consume_number,
+            '8': self._consume_number,
+            '9': self._consume_number,
+        }
+
     def tokenize(self, expression):
         scanner = Scanner(expression)
         while scanner.current is not None:
-            if scanner.current not in TRANSITION_TABLE:
-                # The current char must be in the transition table to
-                # be valid.
-                yield {'type': 'unknown', 'value': scanner.current,
-                       'start': scanner.pos, 'end': scanner.pos}
-                scanner.next()
-                continue
-            state = TRANSITION_TABLE[scanner.current]
-            if state == STATE_SINGLE_CHAR:
-                yield {'type': SIMPLE_TOKENS[scanner.current],
-                       'value': scanner.current,
-                       'start': scanner.pos, 'end': scanner.pos}
-                scanner.next()
-            elif state == STATE_IDENTIFIER:
-                start = scanner.pos
-                buff = scanner.current
-                while scanner.next() in VALID_IDENTIFIER:
-                    buff += scanner.current
-                yield {'type': 'unquoted_identifier', 'value': buff,
-                       'start': start, 'end': len(buff)}
-            elif state == STATE_WHITESPACE:
-                scanner.next()
-            elif state == STATE_LBRACKET:
-                start = scanner.pos
-                next_char = scanner.next()
-                if next_char == ']':
-                    scanner.next()
-                    yield {'type': 'flatten', 'value': '[]',
-                           'start': start, 'end': start + 1}
-                elif next_char == '?':
-                    scanner.next()
-                    yield {'type': 'filter', 'value': '[?',
-                           'start': start, 'end': start + 1}
-                else:
-                    yield {'type': 'lbracket', 'value': '[',
-                           'start': start, 'end': start}
-            elif state == STATE_STRING_LITERAL:
-                yield self._consume_raw_string_literal(scanner)
-            elif state == STATE_PIPE:
-                yield self._match_or_else(scanner, '|', 'or', 'pipe')
-            elif state == STATE_JSON_LITERAL:
-                yield self._consume_literal(scanner)
-            elif state == STATE_NUMBER:
-                start = scanner.pos
-                buff = scanner.current
-                while scanner.next() in VALID_NUMBER:
-                    buff += scanner.current
-                yield {'type': 'number', 'value': int(buff),
-                       'start': start, 'end': len(buff)}
-            elif state == STATE_QUOTED_STRING:
-                yield self._consume_quoted_identifier(scanner)
-            elif state == STATE_LT:
-                yield self._match_or_else(scanner, '=', 'lte', 'lt')
-            elif state == STATE_GT:
-                yield self._match_or_else(scanner, '=', 'gte', 'gt')
-            elif state == STATE_EQ:
-                yield self._match_or_else(scanner, '=', 'eq', 'unknown')
-            elif state == STATE_NOT:
-                yield self._match_or_else(scanner, '=', 'ne', 'unknown')
+            if scanner.current not in self._transitions:
+                raise LexerError(lexer_position=scanner.pos,
+                                 lexer_value=scanner.current,
+                                 message="Unknown token %s" % scanner.current)
+            yield self._transitions[scanner.current](scanner)
         yield {'type': 'eof', 'value': '',
                'start': len(expression), 'end': len(expression)}
 
-    def _consume_literal(self, scanner):
+    @staticmethod
+    def _skip_whitespace(scanner):
+        scanner.next()
+
+    @staticmethod
+    def _simple_token(scanner, token_type):
+        scanner.next()
+        return {'type': token_type, 'value': token_type,
+                'start': scanner.pos - 1, 'end': scanner.pos}
+
+    @staticmethod
+    def _consume_identifier(scanner):
+        start = scanner.pos
+        buff = scanner.current
+        while scanner.next() in Lexer.VALID_IDENTIFIER:
+            buff += scanner.current
+        return {'type': 'unquoted_identifier', 'value': buff,
+                'start': start, 'end': len(buff)}
+
+    @staticmethod
+    def _consume_number(scanner):
+        start = scanner.pos
+        buff = scanner.current
+        while scanner.next() in Lexer.VALID_NUMBER:
+            buff += scanner.current
+        return {'type': 'number', 'value': int(buff),
+                'start': start, 'end': len(buff)}
+
+    @staticmethod
+    def _consume_lbracket(scanner):
+        start = scanner.pos
+        next_char = scanner.next()
+        if next_char == ']':
+            scanner.next()
+            return {'type': 'flatten', 'value': '[]',
+                    'start': start, 'end': start + 1}
+        elif next_char == '?':
+            scanner.next()
+            return {'type': 'filter', 'value': '[?',
+                    'start': start, 'end': start + 1}
+        else:
+            return {'type': 'lbracket', 'value': '[',
+                    'start': start, 'end': start}
+
+    @staticmethod
+    def _consume_literal(scanner):
         start = scanner.pos
         lexeme = scanner.in_delimiter('`')
         lexeme = lexeme.replace('\\`', '`')
@@ -249,7 +221,8 @@ class Lexer(object):
         return {'type': 'literal', 'value': parsed_json,
                 'start': start, 'end': token_len}
 
-    def _consume_quoted_identifier(self, scanner):
+    @staticmethod
+    def _consume_quoted_identifier(scanner):
         start = scanner.pos
         lexeme = '"' + scanner.in_delimiter('"') + '"'
         try:
@@ -262,14 +235,16 @@ class Lexer(object):
                              lexer_value=lexeme,
                              message=error_message)
 
-    def _consume_raw_string_literal(self, scanner):
+    @staticmethod
+    def _consume_raw_string_literal(scanner):
         start = scanner.pos
         lexeme = scanner.in_delimiter("'")
         token_len = scanner.pos - start
         return {'type': 'literal', 'value': lexeme,
                 'start': start, 'end': token_len}
 
-    def _match_or_else(self, scanner, expected, match_type, else_type):
+    @staticmethod
+    def _match_or_else(scanner, expected, match_type, else_type):
         start = scanner.pos
         current = scanner.current
         next_char = scanner.next()
